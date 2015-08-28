@@ -27,6 +27,7 @@ MEMORY_SLOT_DEFAULT=512
 WORKER_RESOURCE_MEMORY=$(( (${WORKER_CONCURRENCY} * ${MEMORY_SLOT_DEFAULT}) + ${MEMORY_SLOT_DEFAULT} ))
 
 # disk setting
+WORKER_TEMP_DIR=/hadoop/dfs/data/tajo
 
 # cpu setting
 CPU_CORES=$(grep -c processor /proc/cpuinfo) # virtual cores
@@ -59,6 +60,10 @@ cat << EOF > ${TAJO_INSTALL_DIR}/conf/tajo-site.xml
   <property>
     <name>tajo.catalog.client-rpc.address</name>
     <value>${MASTER_HOSTNAME}:26005</value>
+  </property>
+  <property>
+    <name>tajo.worker.tmpdir.locations</name>
+    <value>${WORKER_TEMP_DIR}</value>
   </property>
   <property>
     <name>tajo.worker.resource.memory-mb</name>
