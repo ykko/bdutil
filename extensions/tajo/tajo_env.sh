@@ -101,8 +101,6 @@ COMMAND_STEPS=(
   "deploy-ssh-master-setup,*"
   'deploy-core-setup,deploy-core-setup'
   "*,deploy-ssh-worker-setup"
-  "deploy-master-nfs-setup,*"
-  "deploy-client-nfs-setup,deploy-client-nfs-setup"
   'install_tajo,install_tajo'
   'configure_tajo,configure_tajo'
   'start_tajo,*'

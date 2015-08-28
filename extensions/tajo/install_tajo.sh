@@ -35,3 +35,6 @@ add_to_path_at_login "${TAJO_INSTALL_DIR}/bin"
 
 # Assign ownership of everything to the 'hadoop' user.
 chown -R hadoop:hadoop /home/hadoop/ ${TAJO_INSTALL_DIR}
+
+mkdir /hadoop_gcs_connector_metadata_cache
+chown hadoop.hadoop /hadoop_gcs_connector_metadata_cache/
