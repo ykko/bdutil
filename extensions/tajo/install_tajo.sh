@@ -38,3 +38,9 @@ chown -R hadoop:hadoop /home/hadoop/ ${TAJO_INSTALL_DIR}
 
 mkdir /hadoop_gcs_connector_metadata_cache
 chown hadoop.hadoop /hadoop_gcs_connector_metadata_cache/
+
+# Install JDK
+wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz
+tar -xvf jdk-7u79-linux-x64.tar.gz
+mkdir -p /usr/local/java
+mv jdk1.7.0_79 ${TAJO_JAVA_HOME}

@@ -18,10 +18,10 @@
 # Usage: ./bdutil deploy extensions/tajo/tajo_env.sh.
 
 # URIs of tarball to install. [Required]
-TAJO_TARBALL_URI='gs://tajo-test_ys/tajo/tajo-0.10.0.tar.gz'
+TAJO_TARBALL_URI='gs://tajo-test-us-ys/tajo/tajo-0.11.0-SNAPSHOT.tar.gz'
 
 # Base dir of tajo. [Required]
-TAJO_ROOT_DIR='gs://tajo-test_ys/tajo'
+TAJO_ROOT_DIR='gs://tajo-test-us-ys/tajo'
 
 # For catalog store. default is derby.
 CATALOG_ID=''
@@ -31,6 +31,9 @@ CATALOG_URI=''
 
 # For tajo third party lib.
 EXT_LIB=''
+
+# Tajo JAVA_HOME
+TAJO_JAVA_HOME='/usr/local/java/tajo-java'
 
 # Directory on each VM in which to install tajo.
 TAJO_INSTALL_DIR='/home/hadoop/tajo-install'

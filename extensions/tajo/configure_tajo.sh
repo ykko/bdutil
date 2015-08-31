@@ -15,22 +15,13 @@
 set -o nounset
 set -o errexit
 
-# memory setting
+# resource setting
 TOTAL_MEMORY=$(free -m | grep Mem: | /usr/bin/awk '{print $2}')
-WORKER_HEAPSIZE=$(( ${TOTAL_MEMORY} - 1024 ))
-WORKER_CONCURRENCY=$(( ${WORKER_HEAPSIZE} / 3072 ))
-if [ $WORKER_CONCURRENCY -eq 0 ]
-then
-   WORKER_CONCURRENCY=1
-fi
-MEMORY_SLOT_DEFAULT=512
-WORKER_RESOURCE_MEMORY=$(( (${WORKER_CONCURRENCY} * ${MEMORY_SLOT_DEFAULT}) + ${MEMORY_SLOT_DEFAULT} ))
-
-# disk setting
-WORKER_TEMP_DIR=/hadoop/dfs/data/tajo
-
-# cpu setting
 CPU_CORES=$(grep -c processor /proc/cpuinfo) # virtual cores
+MASTER_HEAPSIZE=$(( ${TOTAL_MEMORY} - 1024 ))
+WORKER_HEAPSIZE=$(( ${TOTAL_MEMORY} - 1024 ))
+WORKER_RESOURCE_MEMORY=$(( ${WORKER_HEAPSIZE} / ${CPU_CORES} ))
+WORKER_TEMP_DIR=/hadoop/dfs/data/tajo
 
 # Set up conf/tajo-site.xml
 cat << EOF > ${TAJO_INSTALL_DIR}/conf/tajo-site.xml
@@ -66,16 +57,16 @@ cat << EOF > ${TAJO_INSTALL_DIR}/conf/tajo-site.xml
     <value>${WORKER_TEMP_DIR}</value>
   </property>
   <property>
-    <name>tajo.worker.resource.memory-mb</name>
+    <name>tajo.task.resource.min.memory-mb</name>
     <value>${WORKER_RESOURCE_MEMORY}</value>
   </property>
   <property>
-    <name>tajo.worker.resource.cpu-cores</name>
+    <name>tajo.worker.resource.tajo.worker.resource.cpu-cores</name>
     <value>${CPU_CORES}</value>
   </property>
   <property>
-    <name>tajo.task.memory-slot-mb.default</name>
-    <value>${MEMORY_SLOT_DEFAULT}</value>
+    <name>tajo.worker.resource.disk.parallel-execution.num</name>
+    <value>4</value>
   </property>
 </configuration>
 EOF
@@ -111,10 +102,19 @@ fi
 echo ${WORKERS[@]} | tr ' ' '\n' > ${TAJO_INSTALL_DIR}/conf/workers
 
 # Set up conf/tajo-env.sh
-# Explicitly set up JAVA_HOME for TAJO.
-JAVA_HOME=$(readlink -f $(which java) | sed 's|/bin/java$||')
 cat << EOF >> ${TAJO_INSTALL_DIR}/conf/tajo-env.sh
-export JAVA_HOME=${JAVA_HOME}
+export JAVA_HOME=${TAJO_JAVA_HOME}
 export HADOOP_HOME=${HADOOP_INSTALL_DIR}
+export TAJO_MASTER_HEAPSIZE=${MASTER_HEAPSIZE}
 export TAJO_WORKER_HEAPSIZE=${WORKER_HEAPSIZE}
 EOF
+
+# Set up conf/storage-site.json
+cat << EOF > ${TAJO_INSTALL_DIR}/conf/storage-site.json
+{
+  "storages": {
+    "gs": {
+      "handler": "org.apache.tajo.storage.FileTablespace"
+    }
+  }
+}
