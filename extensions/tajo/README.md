@@ -1,4 +1,4 @@
-Deploying Apache tajo on Google Compute Engine
+Deploying Apache Tajo™ on Google Cloud Platform
 ===============================================
 
 Apache Tajo
@@ -9,11 +9,11 @@ Apache Tajo is a robust big data relational and distributed data warehouse syste
 Getting Started
 ---------------
 
-1. Install a gcloud
+1. Install gcloud SDK
 
     https://cloud.google.com/sdk/
     
-2. Install a bdutil
+2. Install bdutil Tajo extension
 
     $ git clone -b tajo https://github.com/gruter/bdutil.git
     
@@ -24,7 +24,7 @@ Getting Started
     ```
     CONFIGBUCKET="your_bucket" 
     PROJECT="your_project_id" 
-    GCE_ZONE='your_zone'
+    GCE_ZONE="your_zone"
     ```
     
     $ vi extensions/tajo/tajo_env.sh
@@ -38,13 +38,13 @@ Getting Started
 
     1. Create a cloudSQL instance
     
-        $ gcloud sql instances create tajo-meta --assign-ip --authorized-networks 0.0.0.0/0 --region "asia-east1" --tier "D0"
+        $ gcloud sql instances create ``tajo-meta`` --assign-ip --authorized-networks 0.0.0.0/0 --region ``"asia-east1"`` --tier ``"D0"``
         
     2. Create a tajo user in cloudSQL.
     
     3. Create a tajo database in cloudSQL.
     
-    4. Upload a mysql-connector-java.jar to your google cloud storage bucket.
+    4. Upload mysql-connector-java.jar to your google cloud storage bucket.
     
     5. configure tajo_env.sh
     
@@ -64,13 +64,18 @@ Getting Started
 Basic Usage
 -----------
 
-Basic installation of [Apache tajo](http://tajo.apache.org/) alongside Hadoop on Google Cloud Platform.
+Basic installation of [Apache tajo](http://tajo.apache.org/) with Hadoop on Google Cloud Platform.
 
     ./bdutil -e extensions/tajo/tajo_env.sh deploy
 
 Or alternatively, using shorthand syntax:
 
     ./bdutil -e tajo deploy
+    
+Advanced Configuration
+----------------------
+
+Refer to Tajo configuration documents for advanced configuration. (http://tajo.apache.org/docs/current/configuration.html)
 
 Status
 ------
