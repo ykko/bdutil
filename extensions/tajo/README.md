@@ -38,7 +38,7 @@ Getting Started
 
     1. Create a cloudSQL instance
     
-        $ gcloud sql instances create ``tajo-meta`` --assign-ip --authorized-networks 0.0.0.0/0 --region ``"asia-east1"`` --tier ``"D0"``
+        $ gcloud sql instances create *tajo-meta* --assign-ip --authorized-networks 0.0.0.0/0 --region *"asia-east1"* --tier *"D0"*
         
     2. Create a tajo user in cloudSQL.
     
