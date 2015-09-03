@@ -18,10 +18,10 @@
 # Usage: ./bdutil deploy extensions/tajo/tajo_env.sh.
 
 # URIs of tarball to install. [Required]
-TAJO_TARBALL_URI='gs://tajo-test-us-ys/tajo/tajo-0.11.0-SNAPSHOT.tar.gz'
+TAJO_TARBALL_URI='gs://your_bucket/tajo-x.xx.x.tar.gz'
 
 # Base dir of tajo. [Required]
-TAJO_ROOT_DIR='gs://tajo-test-us-ys/tajo'
+TAJO_ROOT_DIR='gs://your_bucket/tajo'
 
 # For catalog store. default is derby.
 CATALOG_ID=''
