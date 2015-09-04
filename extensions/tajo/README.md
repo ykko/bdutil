@@ -82,17 +82,24 @@ Getting Started
 Deployment
 ----------
 
-To deploy Tajo with Hadoop:
-
-    ./bdutil -f -e hadoop2_env.sh,extensions/tajo/tajo_env.sh deploy
-
-Alternatively, you can deploy Tajo without Hadoop:
+To deploy Tajo:
 
     ./bdutil -f -e extensions/tajo/tajo_env.sh deploy
 
 Or you can use shorthand syntax instead:
 
     ./bdutil -f -e tajo deploy
+    
+Destroy
+-------
+
+To delete Tajo:
+
+    ./bdutil -f -e extensions/tajo/tajo_env.sh delete
+
+Or you can use shorthand syntax instead:
+
+    ./bdutil -f -e tajo delete
 
 Basic Usage
 -----------
