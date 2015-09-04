@@ -4,7 +4,8 @@ Deploying Apache Tajo™ on Google Cloud Platform
 Apache Tajo
 -----------
 
-Apache Tajo is a robust big data relational and distributed data warehouse system for Apache Hadoop. Tajo is designed for low-latency and scalable ad-hoc queries, online aggregation, and ETL (extract-transform-load process) on large-data sets stored on HDFS (Hadoop Distributed File System) and other data sources. By supporting SQL standards and leveraging advanced database techniques, Tajo allows direct control of distributed execution and data flow across a variety of query evaluation strategies and optimization opportunities.
+Apache Tajo is a robust big data relational and distributed data warehouse system. Dubbed “an SQL-on-Hadoop solution”, Tajo is optimized for running low-latency, scalable ad-hoc queries and ETL jobs on large-data sets stored on both HDFS and other data sources including Amazon S3 and Google Cloud Storage. By supporting SQL standards and leveraging advanced database techniques, Tajo brings together the latest advances in distributed processing and query optimization, delivering enterprise-grade performance on both routine and massive data sets. With its ability to support both interactive analysis and complex ETL in a single solution, Tajo is a powerful open-source alternative to proprietary data warehousing solutions. 
++This documents explains how to setup Tajo cluster on Google Cloud Platform using bdutil.
 
 Getting Started
 ---------------
@@ -22,29 +23,44 @@ Getting Started
     $ vi  bdutil_env.sh
 
     ```
-    CONFIGBUCKET="your_bucket" 
-    PROJECT="your_project_id" 
-    GCE_ZONE="your_zone"
+    CONFIGBUCKET="YOUR_BUCKET" 
+    PROJECT="YOUR_PROJECT_ID" 
+    GCE_ZONE="YOUR_ZONE"
+    
+    # change it to your instance type.
+    GCE_MACHINE_TYPE='n1-standard-4'  
+    
+    # You can specify different instance type for master node. Otherwise, leave it blank.
+    GCE_MASTER_MACHINE_TYPE='n1-standard-2'    
+
+    # number of worker nodes 
+    NUM_WORKERS=2
     ```
     
     $ vi extensions/tajo/tajo_env.sh
     
     ```
-    TAJO_TARBALL_URI='gs://your_bucket/tajo-x.xx.x.tar.gz'
-    TAJO_ROOT_DIR='gs://your_bucket/tajo'
+    # path to tajo tarball. eg. gs://tajo_release/tajo-0.11.0-SNAPSHOT.tar.gz
+    TAJO_TARBALL_URI='gs://PATH_TO_TAJO_TARBALL/tajo-x.xx.x.tar.gz'
+    
+    # tajo root dir 
+    TAJO_ROOT_DIR='gs://YOUR_BUCKET/tajo'
     ```
     
-4. Running with cloudSQL(optional)
+4. Using cloudSQL for Tajo meta store (optional)
+    
+    By default, Tajo stores its meta data in built-in Derby database in Tajo master node. Since it is ephemeral storage, so you'd better use it for test purpose only. 
+    For continuous analysis work, using permanent meta store such as cloudSQL is strongly recommended.
 
     1. Create a cloudSQL instance
     
         $ gcloud sql instances create *tajo-meta* --assign-ip --authorized-networks 0.0.0.0/0 --region *"asia-east1"* --tier *"D0"*
         
-    2. Create a tajo user in cloudSQL.
+    2. Create user account for Tajo in cloudSQL. (eg. tajo)
     
-    3. Create a tajo database in cloudSQL.
+    3. Create tajo database in cloudSQL. (eg. tajo)
     
-    4. Upload mysql-connector-java.jar to your google cloud storage bucket.
+    4. Locate "mysql-connector-java-x.y.z.jar" to your google cloud storage bucket. Or you can find it in 'gs://tajo_release/ext_lib'
     
     5. configure tajo_env.sh
     
@@ -52,25 +68,51 @@ Getting Started
         
         ```
         # For catalog store. default is derby.
-        CATALOG_ID='your_cloudSQL_account_id'
-        CATALOG_PW='your_cloudSQL_account_passwd'
+        CATALOG_ID='YOUR_CLOUDSQL_ACCOUNT_ID'
+        CATALOG_PW='YOUR_CLOUDSQL_ACCOUNT_PASSWD'
         CATALOG_CLASS='org.apache.tajo.catalog.store.MySQLStore'
-        CATALOG_URI='jdbc:mysql://your_cloudSQL_host:3306/your_cloudSQL_databases?createDatabaseIfNotExist=true'
+        CATALOG_URI='jdbc:mysql://YOUR_CLOUDSQL_HOST:3306/YOUR_CLOUDSQL_DB_NAME?createDatabaseIfNotExist=true'
+        
+        # For tajo third party library directory eg. mysql-connector-java-x.y.z.jar
+        # eg. gs://tajo_release/ext_lib
+        EXT_LIB='gs://PATH_TO_JAR/ext_lib'  
 
-        # For tajo third party library directory(ex mysql-connector-java.jar)
-        EXT_LIB='gs://your_bucket/ext_lib'
         ```
+
+Deployment
+----------
+
+To deploy Tajo with Hadoop:
+
+    ./bdutil -f -e hadoop2_env.sh,extensions/tajo/tajo_env.sh deploy
+
+Alternatively, you can deploy Tajo without Hadoop:
+
+    ./bdutil -f -e extensions/tajo/tajo_env.sh deploy
+
+Or you can use shorthand syntax instead:
+
+    ./bdutil -f -e tajo deploy
 
 Basic Usage
 -----------
 
-Basic installation of [Apache tajo](http://tajo.apache.org/) with Hadoop on Google Cloud Platform.
+By default, Tajo install directory is /home/hadoop/tajo-install. 
 
-    ./bdutil -e extensions/tajo/tajo_env.sh deploy
+Run Tajo command line shell (tsql):
 
-Or alternatively, using shorthand syntax:
+    tsql 
+    
+To stop and start Tajo daemon (Should run as "hadoop" user):
 
-    ./bdutil -e tajo deploy
+    stop-tajo.sh 
+    start-tajo.sh
+
+To check Tajo status, see Tajo web UI in your browser: 
+
+    http://TAJO_MASTER_NODE_IP:26080/
+
+To connect Tajo from your desktop (eg. via SQL workbench tools), be sure to open Tajo JDBC port 26002.
     
 Advanced Configuration
 ----------------------
@@ -81,4 +123,4 @@ Status
 ------
 
 This plugin is currently considered experimental and not officially supported.
-Contributions are welcome.
+Contributions are more than welcome.
