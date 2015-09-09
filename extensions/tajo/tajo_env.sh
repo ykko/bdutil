@@ -15,22 +15,33 @@
 # This file contains environment-variable overrides to be used in conjunction
 # with bdutil_env.sh in order to deploy a Hadoop cluster with HBase installed
 # and configured.
-# Usage: ./bdutil deploy extensions/tajo/tajo_env.sh.
+# Usage: ./bdutil -e tajo deploy
 
 # URIs of tarball to install. [Required]
-TAJO_TARBALL_URI='gs://your_bucket/tajo-x.xx.x.tar.gz'
+# Apache Tajo 0.11.0 or higher
+TAJO_TARBALL_URI=
 
-# Base dir of tajo. [Required]
-TAJO_ROOT_DIR='gs://your_bucket/tajo'
+# Base dir of tajo.
+TAJO_ROOT_DIR='gs://${CONFIGBUCKET}/tajo'
 
-# For catalog store. default is derby.
-CATALOG_ID=''
-CATALOG_PW=''
-CATALOG_CLASS=''
-CATALOG_URI=''
+# Catalog set up.
+# If you want the cloudSQL for catalog store, must be set the CLOUD_SQL_INSTANCE_ID.
+# If you have cloudSQL instance, Set that instance Id or Set the new instance Id that will create.
+# If not exist a cloudSQL instance correspond this id, create new cloudSQL instance automatically as this id.
+# Empty this value is used derby for catalog store.
+CLOUD_SQL_INSTANCE_ID=
 
-# For tajo third party lib.
-EXT_LIB=''
+# It's connection infomation of cloudSQL.
+CLOUD_SQL_CON_ID='root'
+CLOUD_SQL_CON_PW='tajo'
+CLOUD_SQL_CON_DB='tajo'
+
+# Add service-account for cloudSQL
+GCE_SERVICE_ACCOUNT_SCOPES+=('sql-admin','sql','cloud-platform')
+
+# If you use cloudSQL for catalog store, must be include a mysql-connector-java.jar
+# Third party library directory for tajo. It's google cloud storage(gs://).
+EXT_LIB='gs://tajo-test_ys/tajo/lib'
 
 # Tajo JAVA_HOME
 TAJO_JAVA_HOME='/usr/local/java/tajo-java'
@@ -38,53 +49,61 @@ TAJO_JAVA_HOME='/usr/local/java/tajo-java'
 # Directory on each VM in which to install tajo.
 TAJO_INSTALL_DIR='/home/hadoop/tajo-install'
 
-# Sets environment variables for Hadoop 2.x deployment
+# If you want without hadoop daemon.
+if [ `expr "$HADOOP_CONF_DIR" : '.*etc/hadoop'` = 0 ]
+then
+  # Install hadoop2.x without running daemon.
+  GCS_CACHE_CLEANER_LOGGER='INFO,RFA'
 
-GCS_CACHE_CLEANER_LOGGER='INFO,RFA'
+  # URI of Hadoop tarball to be deployed. Must begin with gs:// or http(s)://
+  # Use 'gsutil ls gs://hadoop-dist/hadoop-*.tar.gz' to list Google supplied options
+  HADOOP_TARBALL_URI="gs://hadoop-dist/hadoop-2.7.1.tar.gz"
 
-# URI of Hadoop tarball to be deployed. Must begin with gs:// or http(s)://
-# Use 'gsutil ls gs://hadoop-dist/hadoop-*.tar.gz' to list Google supplied options
-HADOOP_TARBALL_URI="gs://hadoop-dist/hadoop-2.7.1.tar.gz"
+  # Directory holding config files and scripts for Hadoop
+  HADOOP_CONF_DIR="${HADOOP_INSTALL_DIR}/etc/hadoop"
 
-# Directory holding config files and scripts for Hadoop
-HADOOP_CONF_DIR="${HADOOP_INSTALL_DIR}/etc/hadoop"
+  # Fraction of worker memory to be used for YARN containers
+  NODEMANAGER_MEMORY_FRACTION=0.8
 
-# Fraction of worker memory to be used for YARN containers
-NODEMANAGER_MEMORY_FRACTION=0.8
+  # Decimal number controlling the size of map containers in memory and virtual
+  # cores. Since by default Hadoop only supports memory based container
+  # allocation, each map task will be given a container with roughly
+  # (CORES_PER_MAP_TASK / <total-cores-on-node>) share of the memory available to
+  # the NodeManager for containers. Thus an n1-standard-4 with CORES_PER_MAP_TASK
+  # set to 2 would be able to host 4 / 2 = 2 map containers (and no other
+  # containers). For more details see the script 'libexec/configure-mrv2-mem.py'.
+  CORES_PER_MAP_TASK=1.0
 
-# Decimal number controlling the size of map containers in memory and virtual
-# cores. Since by default Hadoop only supports memory based container
-# allocation, each map task will be given a container with roughly
-# (CORES_PER_MAP_TASK / <total-cores-on-node>) share of the memory available to
-# the NodeManager for containers. Thus an n1-standard-4 with CORES_PER_MAP_TASK
-# set to 2 would be able to host 4 / 2 = 2 map containers (and no other
-# containers). For more details see the script 'libexec/configure-mrv2-mem.py'.
-CORES_PER_MAP_TASK=1.0
+  # Decimal number controlling the size of reduce containers in memory and virtual
+  # cores. See CORES_PER_MAP_TASK for more details.
+  CORES_PER_REDUCE_TASK=2.0
 
-# Decimal number controlling the size of reduce containers in memory and virtual
-# cores. See CORES_PER_MAP_TASK for more details.
-CORES_PER_REDUCE_TASK=2.0
+  # Decimal number controlling the size of application master containers in memory
+  # and virtual cores. See CORES_PER_MAP_TASK for more details.
+  CORES_PER_APP_MASTER=2.0
 
-# Decimal number controlling the size of application master containers in memory
-# and virtual cores. See CORES_PER_MAP_TASK for more details.
-CORES_PER_APP_MASTER=2.0
+  # Connector with Hadoop AbstractFileSystem implemenation for YARN
+  GCS_CONNECTOR_JAR='https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-1.4.1-hadoop2.jar'
 
-# Connector with Hadoop AbstractFileSystem implemenation for YARN
-GCS_CONNECTOR_JAR='https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-1.4.1-hadoop2.jar'
+  BIGQUERY_CONNECTOR_JAR='https://storage.googleapis.com/hadoop-lib/bigquery/bigquery-connector-0.7.1-hadoop2.jar'
 
-BIGQUERY_CONNECTOR_JAR='https://storage.googleapis.com/hadoop-lib/bigquery/bigquery-connector-0.7.1-hadoop2.jar'
+  HDFS_DATA_DIRS_PERM='700'
 
+  # 8088 for YARN, 50070 for HDFS.
+  MASTER_UI_PORTS=('8088' '50070')
 
-HDFS_DATA_DIRS_PERM='700'
+  # Use Hadoop 2 specific configuration templates.
+  if [[ -n "${BDUTIL_DIR}" ]]; then
+    UPLOAD_FILES=($(find ${BDUTIL_DIR}/conf/hadoop2 -name '*template.xml'))
+    UPLOAD_FILES+=("${BDUTIL_DIR}/libexec/hadoop_helpers.sh")
+    UPLOAD_FILES+=("${BDUTIL_DIR}/libexec/configure_mrv2_mem.py")
+  fi
 
-# 8088 for YARN, 50070 for HDFS.
-MASTER_UI_PORTS=('8088' '50070')
-
-# Use Hadoop 2 specific configuration templates.
-if [[ -n "${BDUTIL_DIR}" ]]; then
-  UPLOAD_FILES=($(find ${BDUTIL_DIR}/conf/hadoop2 -name '*template.xml'))
-  UPLOAD_FILES+=("${BDUTIL_DIR}/libexec/hadoop_helpers.sh")
-  UPLOAD_FILES+=("${BDUTIL_DIR}/libexec/configure_mrv2_mem.py")
+  COMMAND_STEPS=(
+    "deploy-ssh-master-setup,*"
+    'deploy-core-setup,deploy-core-setup'
+    "*,deploy-ssh-worker-setup"
+  )
 fi
 
 COMMAND_GROUPS+=(
@@ -94,17 +113,18 @@ COMMAND_GROUPS+=(
   "configure_tajo:
      extensions/tajo/configure_tajo.sh
   "
+  "cloudsql:
+     extensions/tajo/cloudsql.sh
+  "
   "start_tajo:
      extensions/tajo/start_tajo.sh
   "
 )
 
-# Installation of tajo on master and workers; then start_tajo only on master.
-COMMAND_STEPS=(
-  "deploy-ssh-master-setup,*"
-  'deploy-core-setup,deploy-core-setup'
-  "*,deploy-ssh-worker-setup"
+COMMAND_STEPS+=(
   'install_tajo,install_tajo'
   'configure_tajo,configure_tajo'
+  'cloudsql,*'
   'start_tajo,*'
 )
+

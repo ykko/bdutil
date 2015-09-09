@@ -71,33 +71,6 @@ cat << EOF > ${TAJO_INSTALL_DIR}/conf/tajo-site.xml
 </configuration>
 EOF
 
-# Set up conf/catalog-site.xml
-if [ ! -z $CATALOG_ID ] && [ ! -z $CATALOG_PW ] && [ ! -z $CATALOG_CLASS ] && [ ! -z $CATALOG_URI ]
-then
-cat << EOF > ${TAJO_INSTALL_DIR}/conf/catalog-site.xml
-<?xml version="1.0"?>
-<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
-<configuration>
-  <property>
-    <name>tajo.catalog.jdbc.connection.id</name>
-    <value>${CATALOG_ID}</value>
-  </property>
-  <property>
-    <name>tajo.catalog.jdbc.connection.password</name>
-    <value>${CATALOG_PW}</value>
-  </property>
-  <property>
-    <name>tajo.catalog.store.class</name>
-    <value>${CATALOG_CLASS}</value>
-  </property>
-  <property>
-    <name>tajo.catalog.jdbc.uri</name>
-    <value>${CATALOG_URI}</value>
-  </property>
-</configuration>
-EOF
-fi
-
 # Set up conf/workers
 echo ${WORKERS[@]} | tr ' ' '\n' > ${TAJO_INSTALL_DIR}/conf/workers
 

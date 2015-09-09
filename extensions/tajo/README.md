@@ -42,9 +42,6 @@ Getting Started
     ```
     # path to tajo tarball. eg. gs://tajo_release/tajo-0.11.0-SNAPSHOT.tar.gz
     TAJO_TARBALL_URI='gs://PATH_TO_TAJO_TARBALL/tajo-x.xx.x.tar.gz'
-    
-    # tajo root dir 
-    TAJO_ROOT_DIR='gs://YOUR_BUCKET/tajo'
     ```
     
 4. Using cloudSQL for Tajo meta store (optional)
@@ -52,32 +49,16 @@ Getting Started
     By default, Tajo stores its meta data in built-in Derby database in Tajo master node. Since it is ephemeral storage, so you'd better use it for test purpose only. 
     For continuous analysis work, using permanent meta store such as cloudSQL is strongly recommended.
 
-    1. Create a cloudSQL instance
-    
-        $ gcloud sql instances create *tajo-meta* --assign-ip --authorized-networks 0.0.0.0/0 --region *"asia-east1"* --tier *"D0"*
-        
-    2. Create user account for Tajo in cloudSQL. (eg. tajo)
-    
-    3. Create tajo database in cloudSQL. (eg. tajo)
-    
-    4. Locate "mysql-connector-java-x.y.z.jar" to your google cloud storage bucket. Or you can find it in 'gs://tajo_release/ext_lib'
-    
-    5. configure tajo_env.sh
-    
-        $ vi extensions/tajo/tajo_env.sh
-        
-        ```
-        # For catalog store. default is derby.
-        CATALOG_ID='YOUR_CLOUDSQL_ACCOUNT_ID'
-        CATALOG_PW='YOUR_CLOUDSQL_ACCOUNT_PASSWD'
-        CATALOG_CLASS='org.apache.tajo.catalog.store.MySQLStore'
-        CATALOG_URI='jdbc:mysql://YOUR_CLOUDSQL_HOST:3306/YOUR_CLOUDSQL_DB_NAME?createDatabaseIfNotExist=true'
-        
-        # For tajo third party library directory eg. mysql-connector-java-x.y.z.jar
-        # eg. gs://tajo_release/ext_lib
-        EXT_LIB='gs://PATH_TO_JAR/ext_lib'  
-
-        ```
+    1. Set CLOUD_SQL_INSTANCE_ID.
+       - ID of cloud sql instance.
+       - If you have cloud sql instance, Set that instance Id or Set the new instance Id that will create.
+       - If not exist cloud sql instance correspond this id, create new cloudSQL instance automatically as this id.
+       - Empty this value is used derby for catalog store.
+       $ vi extensions/tajo/tajo_env.sh
+       
+       ```
+       CLOUD_SQL_INSTANCE_ID=tajo-meta
+       ```
 
 Deployment
 ----------
@@ -131,3 +112,4 @@ Status
 
 This plugin is currently considered experimental and not officially supported.
 Contributions are more than welcome.
+
