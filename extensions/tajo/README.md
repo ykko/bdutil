@@ -54,7 +54,7 @@ Getting Started
        - If you have cloud sql instance, Set that instance Id or Set the new instance Id that will create.
        - If not exist cloud sql instance correspond this id, create new cloudSQL instance automatically as this id.
        - Empty this value is used derby for catalog store.
-       $ vi extensions/tajo/tajo_env.sh
+       - $ vi extensions/tajo/tajo_env.sh
        
        ```
        CLOUD_SQL_INSTANCE_ID=tajo-meta
