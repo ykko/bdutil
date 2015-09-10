@@ -22,7 +22,7 @@
 TAJO_TARBALL_URI=
 
 # Base dir of tajo.
-TAJO_ROOT_DIR='gs://${CONFIGBUCKET}/tajo'
+TAJO_ROOT_DIR="gs://${CONFIGBUCKET}/tajo"
 
 # Catalog set up.
 # If you want the cloudSQL for catalog store, must be set the CLOUD_SQL_INSTANCE_ID.
@@ -39,12 +39,7 @@ CLOUD_SQL_CON_DB='tajo'
 # Add service-account for cloudSQL
 GCE_SERVICE_ACCOUNT_SCOPES+=('sql-admin','sql','cloud-platform')
 
-# If you use cloudSQL for catalog store, must be include a mysql-connector-java.jar
-# Third party library directory for tajo. It's google cloud storage(gs://).
-EXT_LIB='gs://tajo-test_ys/tajo/lib'
-
-# Tajo JAVA_HOME
-TAJO_JAVA_HOME='/usr/local/java/tajo-java'
+INSTALL_JDK_DEVEL=true
 
 # Directory on each VM in which to install tajo.
 TAJO_INSTALL_DIR='/home/hadoop/tajo-install'

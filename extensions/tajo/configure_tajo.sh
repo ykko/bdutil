@@ -21,7 +21,19 @@ CPU_CORES=$(grep -c processor /proc/cpuinfo) # virtual cores
 MASTER_HEAPSIZE=$(( ${TOTAL_MEMORY} - 1024 ))
 WORKER_HEAPSIZE=$(( ${TOTAL_MEMORY} - 1024 ))
 WORKER_RESOURCE_MEMORY=$(( ${WORKER_HEAPSIZE} / ${CPU_CORES} ))
-WORKER_TEMP_DIR=/hadoop/dfs/data/tajo
+HDFS_DATA_DIRS=`awk -F"[<>]" '/dfs.datanode.data.dir/ {getline;print $3;exit}' ${HADOOP_CONF_DIR}/hdfs-site.xml`
+WORKER_TEMP_DIR=
+for data_dir in $(echo $HDFS_DATA_DIRS | tr "," "\n")
+do
+  mkdir -p ${data_dir}/tajo
+  chown -R hadoop.hadoop ${data_dir}/tajo
+  if [ -z $WORKER_TEMP_DIR ]
+  then
+    WORKER_TEMP_DIR=${data_dir}/tajo
+  else
+    WORKER_TEMP_DIR=${WORKER_TEMP_DIR},${data_dir}/tajo
+  fi
+done
 
 # Set up conf/tajo-site.xml
 cat << EOF > ${TAJO_INSTALL_DIR}/conf/tajo-site.xml
@@ -76,7 +88,7 @@ echo ${WORKERS[@]} | tr ' ' '\n' > ${TAJO_INSTALL_DIR}/conf/workers
 
 # Set up conf/tajo-env.sh
 cat << EOF >> ${TAJO_INSTALL_DIR}/conf/tajo-env.sh
-export JAVA_HOME=${TAJO_JAVA_HOME}
+export JAVA_HOME=${JAVA_HOME}
 export HADOOP_HOME=${HADOOP_INSTALL_DIR}
 export TAJO_MASTER_HEAPSIZE=${MASTER_HEAPSIZE}
 export TAJO_WORKER_HEAPSIZE=${WORKER_HEAPSIZE}
@@ -91,3 +103,6 @@ cat << EOF > ${TAJO_INSTALL_DIR}/conf/storage-site.json
     }
   }
 }
+
+# Assign ownership of everything to the 'hadoop' user.
+chown -R hadoop.hadoop ${TAJO_INSTALL_DIR}/conf

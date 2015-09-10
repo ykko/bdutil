@@ -57,4 +57,8 @@ cat << EOF > ${TAJO_INSTALL_DIR}/conf/catalog-site.xml
 </configuration>
 EOF
 
+# Install mysql-connector
+apt-get install --yes libmysql-java
+cp /usr/share/java/mysql-connector-java.jar ${TAJO_INSTALL_DIR}/lib/
+
 fi
