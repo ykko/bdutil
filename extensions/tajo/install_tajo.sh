@@ -27,11 +27,10 @@ mv /home/hadoop/tajo*/ ${TAJO_INSTALL_DIR}
 # during interactive ssh session.
 add_to_path_at_login "${TAJO_INSTALL_DIR}/bin"
 
-# Assign ownership of everything to the 'hadoop' user.
-chown -R hadoop.hadoop ${TAJO_INSTALL_DIR}
-
 if [ ! -d /hadoop_gcs_connector_metadata_cache ]
 then
   mkdir /hadoop_gcs_connector_metadata_cache
   chown hadoop.hadoop /hadoop_gcs_connector_metadata_cache/
 fi
+
+sudo chown -R hadoop.hadoop ${TAJO_INSTALL_DIR}

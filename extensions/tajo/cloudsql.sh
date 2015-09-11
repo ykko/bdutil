@@ -61,4 +61,6 @@ EOF
 apt-get install --yes libmysql-java
 cp /usr/share/java/mysql-connector-java.jar ${TAJO_INSTALL_DIR}/lib/
 
+sudo chown -R hadoop.hadoop ${TAJO_INSTALL_DIR}/conf
+
 fi

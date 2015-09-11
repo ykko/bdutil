@@ -103,6 +103,6 @@ cat << EOF > ${TAJO_INSTALL_DIR}/conf/storage-site.json
     }
   }
 }
+EOF
 
-# Assign ownership of everything to the 'hadoop' user.
-chown -R hadoop.hadoop ${TAJO_INSTALL_DIR}/conf
+sudo chown -R hadoop.hadoop ${TAJO_INSTALL_DIR}/conf
