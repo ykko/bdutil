@@ -17,34 +17,36 @@
 # and configured.
 # Usage: ./bdutil -e tajo deploy
 
-# URIs of tarball to install. [Required]
-# Apache Tajo 0.11.0 or higher
-TAJO_TARBALL_URI=
+# URIs of Tajo tarball to install. [Required]
+# Recommended Tajo version: Apache Tajo 0.11.0 or higher (eg. gs://tajo_release/tajo-0.11.0-SNAPSHOT.tar.gz)
+TAJO_TARBALL_URI=''
 
-# Base dir of tajo.
+# Tajo root directory
 TAJO_ROOT_DIR="gs://${CONFIGBUCKET}/tajo"
 
-# Catalog set up.
-# If you want the cloudSQL for catalog store, must be set the CLOUD_SQL_INSTANCE_ID.
-# If you have cloudSQL instance, Set that instance Id or Set the new instance Id that will create.
-# If not exist a cloudSQL instance correspond this id, create new cloudSQL instance automatically as this id.
-# Empty this value is used derby for catalog store.
-CLOUD_SQL_INSTANCE_ID=
+# Tajo meta store (catalog) setting
+# To reuse existing cloudSQL catalog, set the instance id of cloudSQL instance.
+# Or if you set non-existing instance id, new cloudSQL instance will be created automatically. 
+# (In this case, the instance id should be unique and CLOUD_SQL_CON_ID should be 'root'.)
+# To use default built-in Derby database, leave it blank.
+CLOUD_SQL_INSTANCE_ID=''
 
-# It's connection infomation of cloudSQL.
+# connection parameters in case of using cloudSQL for Tajo meta store
 CLOUD_SQL_CON_ID='root'
 CLOUD_SQL_CON_PW='tajo'
 CLOUD_SQL_CON_DB='tajo'
 
-# Add service-account for cloudSQL
+# Service account setting for cloudSQL
 GCE_SERVICE_ACCOUNT_SCOPES+=('sql-admin','sql','cloud-platform')
 
+# If true, install JDK with compiler/tools in addition to just the JRE.
 INSTALL_JDK_DEVEL=true
 
-# Directory on each VM in which to install tajo.
+# Tajo will be installed in this directory on each VM
 TAJO_INSTALL_DIR='/home/hadoop/tajo-install'
 
-# If you want without hadoop daemon.
+# You can launch Tajo with or without Hadoop2.
+# Without Hadoop2, some steps in COMMAND_STEPS of hadoop2_env.sh are not required, thus overwride the list here.
 if [ `expr "$HADOOP_CONF_DIR" : '.*etc/hadoop'` = 0 ]
 then
   # Install hadoop2.x without running daemon.
